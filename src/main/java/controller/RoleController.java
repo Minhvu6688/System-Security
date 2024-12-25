@@ -38,10 +38,3 @@ public class RoleController {
     }
 
 }
-
-git status
-git add .
-git commit -m "Initial commit"
-git remote add origin https://github.com/Minhvu6688/System-Security
-git push -u origin main
-

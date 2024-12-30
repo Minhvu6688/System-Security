@@ -1,27 +1,24 @@
-package model;
+package dto;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
-@Entity
-@Table(name = "roles")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Role {
+public class RoleDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer roleId;
 
-    @Column(nullable = false, length = 50)
+    @NotNull(message = "Role name is required")
+    @Size(max = 50, message = "Role name must not exceed 50 characters")
     private String roleName;
 
     // Getters and Setters
+
     public Integer getRoleId() {
         return roleId;
     }

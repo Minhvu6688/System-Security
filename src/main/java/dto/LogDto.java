@@ -1,36 +1,29 @@
-package model;
+package dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.security.Timestamp;
 
-@Entity
-@Table(name = "logs")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Log {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class LogDto {
     private Integer logId;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @NotNull(message = "Action is required")
     private String action;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @NotNull(message = "User ID is required")
+    private Integer userId;
 
-    @Column(name = "timestamp", nullable = false)
     private Timestamp timestamp;
 
     // Getters and Setters
-
     public Integer getLogId() {
         return logId;
     }
@@ -47,12 +40,12 @@ public class Log {
         this.action = action;
     }
 
-    public User getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public Timestamp getTimestamp() {

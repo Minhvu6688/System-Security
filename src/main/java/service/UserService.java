@@ -1,16 +1,12 @@
 package service;
 
-import dto.PasswordChangeDTO;
-import dto.UserDTo;
+import dto.UserDto;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import model.Log;
-import model.PasswordHistory;
 import model.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import repositories.LogRepository;
-import repositories.PasswordChangeRepository;
 import repositories.UserRepository;
 import java.util.Optional;
 
@@ -21,24 +17,21 @@ public class UserService  implements IUserService{
 
     private final UserRepository userRepository;
     private final LogRepository logRepository;
-    private final PasswordChangeRepository passwordChangeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     // Constructor thủ công để khởi tạo các biến `final`
     public UserService(UserRepository userRepository,
                        LogRepository logRepository,
-                       PasswordChangeRepository passwordChangeRepository,
                        BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.logRepository = logRepository;
-        this.passwordChangeRepository = passwordChangeRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
 
     @Override
     @Transactional
-    public User createUser(UserDTo userDTo) {
+    public User createUser(UserDto userDTo) {
         if (userRepository.findByUsername(userDTo.getUsername()).isPresent() ||
                 userRepository.findByEmail(userDTo.getEmail()).isPresent()) {
             throw new RuntimeException("Username or Email already exists");

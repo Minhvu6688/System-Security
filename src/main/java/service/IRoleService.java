@@ -1,6 +1,6 @@
 package service;
 
-import dto.RoleDTO;
+import dto.RoleDto;
 import model.Role;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public interface IRoleService {
     Optional<Role> getRoleByName(String name);
 
     //phuong thuc tao role moi
-    Role createRole(RoleDTO roleDTO);
+    Role createRole(RoleDto roleDTO);
 
     //phuong thuc lay tat ca cac role
     List<Role> getAllRoles();

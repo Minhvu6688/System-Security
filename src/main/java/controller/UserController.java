@@ -1,7 +1,6 @@
 package controller;
 
-import dto.UserDTo;
-import lombok.RequiredArgsConstructor;
+import dto.UserDto;
 import model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,7 @@ public class UserController {
 
     // Api để tạo người dùng mới
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserDTo userDTo) {
+    public ResponseEntity<User> createUser(@RequestBody UserDto userDTo) {
         try {
             User user = userService.createUser(userDTo);
             return new ResponseEntity<>(user, HttpStatus.CREATED);
@@ -43,4 +42,14 @@ public class UserController {
                 .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
     }
+
+    @RestController
+        @RequestMapping("/api/test")
+    public class TestController {
+        @GetMapping
+        public ResponseEntity<String> testEndpoint() {
+            return new ResponseEntity<>("API working", HttpStatus.OK);
+        }
+    }
+
 }

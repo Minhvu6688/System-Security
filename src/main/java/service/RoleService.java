@@ -1,7 +1,6 @@
 package service;
 
-import dto.RoleDTO;
-import lombok.RequiredArgsConstructor;
+import dto.RoleDto;
 import model.Role;
 import org.springframework.stereotype.Service;
 import repositories.RoleRepository;
@@ -26,11 +25,11 @@ public class RoleService implements IRoleService {
 
     @Override
     public Optional<Role> getRoleByName(String name) {
-        return roleRepository.findByName(name);
+        return roleRepository.findByRoleName(name);
     }
 
     @Override
-    public Role createRole(RoleDTO roleDTO) {
+    public Role createRole(RoleDto roleDTO) {
         Role role = new Role();
         role.setName(roleDTO.getName());
         return roleRepository.save(role);

@@ -69,7 +69,7 @@ public class CategoryService implements ICategoryService{
 
     @Override
     public List<CategoryDto> getCategoriesByBranchId(Long branchId) {
-        return categoryRepository.findByParentCategoryId(branchId).stream().map(this::convertToDTO).collect(Collectors.toList());
+        return categoryRepository.findByBranchId(branchId).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
 

@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.model;
 
 import jakarta.persistence.*;
@@ -108,3 +109,4 @@ public class User implements UserDetails {
     }
 
 }
+*/

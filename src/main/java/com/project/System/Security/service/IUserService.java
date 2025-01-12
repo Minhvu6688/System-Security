@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.service;
 
 import com.project.System.Security.dto.UserDto;
@@ -16,3 +17,4 @@ public interface IUserService {
     String login(String username, String password) throws Exception;
     User validateUser(String username, String password);
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.repositories;
 
 import com.project.System.Security.model.Shift;
@@ -13,3 +14,4 @@ public interface ShiftRepository extends JpaRepository<Shift, Integer> {
     @Query("SELECT s FROM Shift s WHERE s.assignedEmployee.userId = :userId")
     List<Shift> findByAssignedEmployeeId(@Param("userId") Integer userId);
 }
+*/

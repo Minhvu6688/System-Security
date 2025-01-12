@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.model;
 
 import jakarta.persistence.*;
@@ -36,3 +37,4 @@ public class Token {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }
+*/

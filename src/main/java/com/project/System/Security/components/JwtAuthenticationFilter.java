@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.components;
 
 import com.project.System.Security.model.User;
@@ -105,3 +106,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 //        filterChain.doFilter(request, response);  // Tiếp tục yêu cầu nếu token hợp lệ
 //    }
 
+*/

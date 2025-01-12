@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.config;
 
 import com.project.System.Security.repositories.UserRepository;
@@ -170,4 +171,4 @@ public class SecurityConfig {
 ////                .loginPage("/login")  // Cung cấp trang đăng nhập tùy chỉnh
 ////                .defaultSuccessUrl("/home", true)  // Chuyển hướng tới /home sau khi đăng nhập thành công
 ////                .and()
-////                .httpBasic();  // Nếu bạn vẫn muốn sử dụng Basic Authentication cho API
+////                .httpBasic();  // Nếu bạn vẫn muốn sử dụng Basic Authentication cho API*/

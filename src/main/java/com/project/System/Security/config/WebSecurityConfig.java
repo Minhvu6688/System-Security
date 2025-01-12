@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.config;
 
 import com.project.System.Security.components.JwtAuthenticationFilter;
@@ -75,4 +76,4 @@ public class WebSecurityConfig {
             });
             return http.build();
     }
-}
+}*/

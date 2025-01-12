@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.service;
 
 import com.project.System.Security.Exception.InvalidPasswordException;
@@ -205,4 +206,4 @@ public class UserService implements IUserService{
 //        }
 //        User user = userRepository.findByUsername(username)
 //                .orElseThrow(() -> new RuntimeException("User not found"));
-//        return convertToDTO(user);
+//        return convertToDTO(user);*/

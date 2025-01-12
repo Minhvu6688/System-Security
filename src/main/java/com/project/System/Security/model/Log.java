@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.model;
 
 import jakarta.persistence.*;
@@ -63,3 +64,4 @@ public class Log {
         this.timestamp = timestamp;
     }
 }
+*/

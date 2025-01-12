@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.repositories;
 
 import com.project.System.Security.model.Log;
@@ -14,3 +15,4 @@ public interface LogRepository extends JpaRepository<Log, Integer> {
 
 
 }
+*/

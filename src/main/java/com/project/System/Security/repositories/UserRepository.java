@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.repositories;
 
 import com.project.System.Security.model.User;
@@ -17,3 +18,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.role.roleId = :roleId")
     List<User> findByRoleId(@Param("roleId") Integer roleId);
 }
+*/

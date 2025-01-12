@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.controller;
 
 import com.project.System.Security.dto.LogDto;
@@ -43,3 +44,4 @@ public class LogController {
         return ResponseEntity.ok(logs);
     }
 }
+*/

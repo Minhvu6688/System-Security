@@ -1,3 +1,4 @@
+/*
 package com.project.System.Security.service;
 
 import com.project.System.Security.dto.LogDto;
@@ -86,3 +87,4 @@ public class    LogService implements ILogService {
 //        } else {
 //            throw new RuntimeException("User not found");
 //        }
+*/

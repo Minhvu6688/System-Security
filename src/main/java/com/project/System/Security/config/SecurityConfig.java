@@ -1,5 +1,6 @@
 package com.project.System.Security.config;
 
+import com.project.System.Security.model.User;
 import com.project.System.Security.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
+import java.util.Optional;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -27,11 +31,30 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> (org.springframework.security.core.userdetails.UserDetails) userRepository
-                .findByUsername(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException
-                                ("Cannot find user with username " + username));
+//        return username -> (org.springframework.security.core.userdetails.UserDetails) userRepository
+//                .findByUsername(username)
+//                .orElseThrow(() ->
+//                        new UsernameNotFoundException
+//                                ("Cannot find user with username " + username));
+        return username -> {
+            // Tìm người dùng theo username
+            Optional<User> optionalUser = userRepository.findByUsername(username);
+
+            // Kiểm tra xem người dùng có tồn tại không
+            if (optionalUser.isEmpty()) {
+                throw new UsernameNotFoundException("User not found with username: " + username);
+            }
+
+            // Lấy người dùng từ Optional
+            User user = optionalUser.get();
+
+            // Tạo UserDetails từ User
+            return new org.springframework.security.core.userdetails.User(
+                    user.getUsername(),
+                    user.getPassword(),
+                    user.getAuthorities()
+            );
+        };
     }
     // Cấu hình PasswordEncoder
     @Bean

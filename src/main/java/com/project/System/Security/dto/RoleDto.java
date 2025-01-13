@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 public class RoleDto {
 
-    private Integer roleId;
+    private Long roleId;
 
     @NotNull(message = "Role name is required")
     @Size(max = 50, message = "Role name must not exceed 50 characters")
@@ -20,11 +20,11 @@ public class RoleDto {
     // Getters and Setters
 
     public Integer getRoleId() {
-        return roleId;
+        return Math.toIntExact(roleId);
     }
 
     public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
+        this.roleId = Long.valueOf(roleId);
     }
 
     public String getRoleName() {

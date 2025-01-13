@@ -29,50 +29,79 @@ import static org.springframework.http.HttpMethod.*;
 public class WebSecurityConfig {
     @Value("${api.prefix}")
     private String apiPrefix;
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
     public WebSecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
+
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF
+//                .cors(cors -> {
+//                    CorsConfiguration corsConfiguration = new CorsConfiguration();
+//                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:4300")); // Địa chỉ frontend của bạn
+//                    corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+//                    corsConfiguration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+//                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//                    source.registerCorsConfiguration("/**", corsConfiguration);
+//                    cors.configurationSource(source);
+//                })
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Thêm filter JWT
+//                .authorizeHttpRequests(requests -> {
+//                    requests
+//                            .requestMatchers(
+//                                    String.format("%s/users/login", apiPrefix),
+//                                    String.format("%s/users/register", apiPrefix)
+//                            )
+//                            .permitAll() // Cho phép truy cập không cần xác thực
+//                            .requestMatchers(POST,
+//                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
+//                            .requestMatchers(GET,
+//                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
+//                            .requestMatchers(PUT,
+//                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
+//                            .requestMatchers(DELETE,
+//                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
+//                            .anyRequest().authenticated(); // Các yêu cầu khác cần xác thực
+//                });
+//
+//        return http.build();
+//    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf().disable()
+                .cors().and() // Đảm bảo CORS được cấu hình
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeHttpRequests(requests ->{
+                .authorizeHttpRequests(requests -> {
                     requests
                             .requestMatchers(
-                                String.format("%s/users/login", apiPrefix),
-                                String.format("%s/users/register", apiPrefix)
+                                    String.format("%s/users/login", apiPrefix),
+                                    String.format("%s/users/register", apiPrefix),
+                                    String.format("%s/branches", apiPrefix),
+                                    String.format("%s/branches/**", apiPrefix)
                             )
-
-                            .permitAll()
-                            .requestMatchers(POST,
-                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
-                            .requestMatchers(GET,
-                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
-                            .requestMatchers(PUT,
-                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
-                            .requestMatchers(DELETE,
-                                    String.format("%s/branches/**", apiPrefix)).hasRole("USER")
-                            .anyRequest().authenticated();
-    })
-                .csrf(AbstractHttpConfigurer::disable);
-            http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
-
-                @Override
-                public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {
+                            .permitAll() // Cho phép truy cập không cần xác thực
+                            .anyRequest().authenticated(); // Các yêu cầu khác cần xác thực
+                });
+        http
+                .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF
+                .cors(cors -> {
                     CorsConfiguration corsConfiguration = new CorsConfiguration();
-                    corsConfiguration.setAllowedOrigins(List.of("port 4300"));
-                    corsConfiguration.setAllowedMethods(Arrays.asList("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-                    corsConfiguration.setAllowedHeaders(Arrays.asList("authorization","content-type","x-auth-token"));
-                    corsConfiguration.setAllowedHeaders(List.of("x-auth-token"));
+                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:4300")); // Địa chỉ frontend của bạn
+                    corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                    corsConfiguration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
                     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                     source.registerCorsConfiguration("/**", corsConfiguration);
-                    httpSecurityCorsConfigurer.configurationSource(source);
-                }
-            });
-            return http.build();
+                    cors.configurationSource(source);
+                });
+
+        return http.build();
     }
+
 }

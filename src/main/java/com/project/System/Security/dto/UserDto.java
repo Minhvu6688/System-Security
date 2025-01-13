@@ -1,8 +1,6 @@
 package com.project.System.Security.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -23,11 +21,11 @@ public class UserDto {
     @NotNull(message = "Password is required")
     private String password;
 
-    @JsonProperty("roleId")
+    @JsonProperty("role_id")
     @NotNull(message = "Role ID is required")
-    private Integer roleId;
+    private Long roleId;
 
-    @JsonProperty("branchId")
+    @JsonProperty("branch_id")
     @NotNull(message = "Branch ID is required")
     private Long branchId;
 
@@ -57,11 +55,11 @@ public class UserDto {
         this.username = username;
     }
 
-    public Integer getRoleId() {
+    public Long getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 

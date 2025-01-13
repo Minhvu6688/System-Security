@@ -21,58 +21,52 @@ import java.util.function.Function;
 @Component
 @RequiredArgsConstructor
 public class JwtTokenUtil {
-    private static final String SECRET_KEY = "qlbv"; // Use a constant secret key
-    private static final long EXPIRATION_TIME = 86400000L; // 1 day
+    // Tạo khóa ký an toàn cho HS512
+    private static final Key SIGNING_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    private static final long EXPIRATION_TIME = 86400000L; // 1 ngày
 
-    // Method to generate a JWT token for a user
+    // Phương thức để tạo JWT token cho người dùng
     public static String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .claim("role", user.getRole().getRoleName()) // Assuming the role's name is what you want in the token
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY) // Use SECRET_KEY constant
+                .claim("role", user.getRole().getRoleName()) // Giả sử tên vai trò là điều bạn muốn trong token
+                .signWith(SIGNING_KEY) // Sử dụng khóa ký an toàn
                 .compact();
     }
 
-    // Method to get the signing key from the secret key
-    private static Key getSignInKey() {
-        byte[] bytes = Decoders.BASE64.decode(SECRET_KEY); // Decode the SECRET_KEY
-        return Keys.hmacShaKeyFor(bytes);
-    }
-
-    // Method to extract all claims from the token
+    // Phương thức để trích xuất tất cả các claim từ token
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(getSignInKey()) // Use the signing key here
+                .setSigningKey(SIGNING_KEY) // Sử dụng khóa ký ở đây
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    // Method to extract a specific claim from the token
+    // Phương thức để trích xuất một claim cụ thể từ token
     public <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = this.extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // Check if the token is expired
+    // Kiểm tra xem token đã hết hạn chưa
     public Boolean isTokenExpired(String token) {
         Date expirationDate = this.extractClaims(token, Claims::getExpiration);
         return expirationDate.before(new Date());
     }
 
-    // Extract username from the token
+    // Trích xuất tên người dùng từ token
     public String extractUserName(String token) {
         return extractClaims(token, Claims::getSubject);
     }
 
-    // Validate the token by comparing the username and checking expiration
+    // Xác thực token bằng cách so sánh tên người dùng và kiểm tra thời gian hết hạn
     public boolean validateToken(String token, User userDetails) {
         String userName = extractUserName(token);
         return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
-
 }
 
 //private static final String SECRET_KEY = "qlbv";

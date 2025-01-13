@@ -11,7 +11,7 @@ public interface IUserService {
     void deleteUser(Integer id);
     UserDto getUserById(Integer id);
     List<UserDto> getAllUsers();
-    List<UserDto> getUsersByRoleId(Integer roleId);
+    List<UserDto> getUsersByRoleId(Long roleId);
     List<UserDto> getUsersByBranchId(Long branchId);
     String login(String username, String password) throws Exception;
     User validateUser(String username, String password);

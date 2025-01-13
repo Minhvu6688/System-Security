@@ -1,27 +1,28 @@
 package com.project.System.Security.service;
 
 import com.project.System.Security.Exception.InvalidPasswordException;
+import com.project.System.Security.Exception.ResourceNotFoundException;
 import com.project.System.Security.Exception.UserNotFoundException;
 import com.project.System.Security.components.JwtTokenUtil;
+import com.project.System.Security.controller.UserController;
 import com.project.System.Security.dto.UserDto;
 import com.project.System.Security.model.Branch;
 import com.project.System.Security.model.Role;
 import com.project.System.Security.model.User;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.project.System.Security.repositories.BranchRepository;
 import com.project.System.Security.repositories.RoleRepository;
 import com.project.System.Security.repositories.UserRepository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,8 +37,10 @@ public class UserService implements IUserService{
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
     private final ModelMapper modelMapper;
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
+
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
                        BranchRepository branchRepository, PasswordEncoder passwordEncoder,AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, ModelMapper modelMapper) {
         this.userRepository = userRepository;
@@ -52,25 +55,38 @@ public class UserService implements IUserService{
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = new User();
-        user.setUsername(userDto.getUsername());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword())); // Mã hóa password
+        log.info("Creating user with username: {}", userDto.getUsername());
 
-        if (userDto.getRoleId() != null) {
-            Role role = roleRepository.findById(userDto.getRoleId())
-                    .orElseThrow(() -> new RuntimeException("Role not found with id: " + userDto.getRoleId()));
-            user.setRole(role);
+        // Kiểm tra username có tồn tại không
+        if (userRepository.existsByUsername(userDto.getUsername())) {
+            throw new IllegalArgumentException("Username already exists: " + userDto.getUsername());
         }
 
-        if (userDto.getBranchId() != null) {
-            Branch branch = branchRepository.findById(userDto.getBranchId())
-                    .orElseThrow(() -> new RuntimeException("Branch not found with id: " + userDto.getBranchId()));
-            user.setBranch(branch);
-        }
+        // Kiểm tra roleId
+        Role role = roleRepository.findById(Math.toIntExact(userDto.getRoleId()))
+                .orElseThrow(() -> new IllegalArgumentException("Role not found with ID: " + userDto.getRoleId()));
+
+        // Kiểm tra branchId
+        Branch branch = branchRepository.findById(userDto.getBranchId())
+                .orElseThrow(() -> new IllegalArgumentException("Branch not found with ID: " + userDto.getBranchId()));
+
+        log.info("Role found: {}", role.getRoleName());
+        log.info("Branch found: {}", branch.getName());
+
+        // Chuyển đổi DTO thành Entity
+        User user = modelMapper.map(userDto, User.class);
+        user.setRole(role);
+        user.setBranch(branch);
+
+        // Mã hóa mật khẩu trước khi lưu
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+        user.setPassword(encodedPassword);
+
+        // Lưu user vào DB
         user = userRepository.save(user);
-        return convertToDTO(user);
-    }
 
+        return modelMapper.map(user, UserDto.class);
+    }
     @Override
     public UserDto updateUser(Integer id, UserDto userDTO) {
         User user = userRepository.findById(Long.valueOf(id))
@@ -83,7 +99,7 @@ public class UserService implements IUserService{
         }
 
         if (userDTO.getRoleId() != null) {
-            Role role = roleRepository.findById(userDTO.getRoleId())
+            Role role = roleRepository.findById(Math.toIntExact(userDTO.getRoleId()))
                     .orElseThrow(() -> new RuntimeException("Role not found"));
             user.setRole(role);
         }
@@ -122,8 +138,8 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public List<UserDto> getUsersByRoleId(Integer roleId) {
-        List<User> users = userRepository.findByRoleId(roleId);
+    public List<UserDto> getUsersByRoleId(Long roleId) {
+        List<User> users = userRepository.findByRoleId(Math.toIntExact(roleId));
         return users.stream()
                 .map(user -> modelMapper.map(user, UserDto.class))
                 .collect(Collectors.toList());
@@ -139,47 +155,55 @@ public class UserService implements IUserService{
 
     @Override
     public String login(String username, String password) throws Exception{
-//        Optional<User> optionalUser = userRepository.findByUsername(username);
-//        if (optionalUser.isEmpty()) {
-//            throw new Exception("User not found with username: " + username);
-//        }
-//
-//        User existingUser = optionalUser.get();
-//        if (passwordEncoder.matches(password, existingUser.getPassword())) {
-//            throw new Exception("Wrong password");
-//        }
-//        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-//                username, password,
-//                existingUser.getAuthorities()
-//        );
-//        authenticationManager.authenticate(authenticationToken);
-//        return jwtTokenUtil.generateToken(existingUser);
+        log.info("Attempting login for username: {}", username);
+
+        // Tìm user theo username
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
+            log.warn("Login failed. User not found for username: {}", username);
             throw new Exception("User not found");
         }
-        User existingUser = optionalUser.get();
-        if (passwordEncoder.matches(password, existingUser.getPassword())) {
+
+        User user = optionalUser.get();
+        log.info("User found with username: {}", user.getUsername());
+
+        // Kiểm tra mật khẩu
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            log.warn("Login failed. Incorrect password for username: {}", username);
             throw new Exception("Wrong password");
         }
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                username, password,
-                existingUser.getAuthorities()
-        );
-        authenticationManager.authenticate(authenticationToken);
-        return jwtTokenUtil.generateToken(existingUser);
-    }
 
+        log.info("Login successful for username: {}", username);
+
+        // Tạo token xác thực
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                user,
+                null,
+                user.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        return JwtTokenUtil.generateToken(user);
+    }
 
     @Override
     public User validateUser(String username, String password) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        // Tìm người dùng theo tên người dùng
+        Optional<User> optionalUser = userRepository.findByUsername(username);
 
+        // Kiểm tra xem người dùng có tồn tại không
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException("User not found with username: " + username);
+        }
+
+        // Lấy người dùng từ Optional
+        User user = optionalUser.get();
+
+        // Kiểm tra mật khẩu
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidPasswordException("Invalid password for username: " + username);
         }
-
+        log.info("Login successful for username: {}", username);
         return user;
     }
 
@@ -188,8 +212,8 @@ public class UserService implements IUserService{
         userDto.setUserId(user.getUserId());
         userDto.setUsername(user.getUsername());
         userDto.setPassword(null);
-        userDto.setRoleId(user.getRole() != null
-                ? user.getRole().getRoleId() : null);
+        userDto.setRoleId(Long.valueOf(user.getRole() != null
+                ? user.getRole().getRoleId() : null));
         userDto.setBranchId(user.getBranch() != null
                 ? user.getBranch().getId() : null);
         return userDto;

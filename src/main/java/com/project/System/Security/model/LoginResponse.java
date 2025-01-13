@@ -12,13 +12,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Token {
+public class LoginResponse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "token", nullable = false, length = 255, unique = true)
     private String token;
+
+    public LoginResponse(String token) {
+        this.token = token;
+    }
 
     @Column(name = "token_type", nullable = false, length = 50)
     private String tokenType;
@@ -35,4 +39,5 @@ public class Token {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
 }
